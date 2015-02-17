@@ -29,6 +29,8 @@ static NSDateFormatter *_dateFormatter;
 @dynamic thumbExists;
 @dynamic mimeType;
 @dynamic clientModified;
+@dynamic localPath;
+@dynamic isDownloading;
 @dynamic hash_db;
 @dynamic contents;
 @dynamic parent;
@@ -61,6 +63,9 @@ static NSDateFormatter *_dateFormatter;
     if([keys containsObject:kJsonPathKey])
         self.path = jsonDict[kJsonPathKey];
     
+    if([keys containsObject:kJsonLocalPathKey])
+        self.localPath = jsonDict[kJsonLocalPathKey];
+    
     if([keys containsObject:kJsonRootKey])
         self.root = jsonDict[kJsonRootKey];
     
@@ -81,6 +86,8 @@ static NSDateFormatter *_dateFormatter;
             self.filename = components[components.count - 1];
     }
     
+    
+    
     if([keys containsObject:kJsonModifiedKey])
         self.modified = [NSDate dateFromDropboxString:jsonDict[kJsonModifiedKey]].timeIntervalSince1970;
     
@@ -90,6 +97,9 @@ static NSDateFormatter *_dateFormatter;
     
     if([keys containsObject:kJsonClientModifiedKey])
         self.clientModified = [NSDate dateFromDropboxString:jsonDict[kJsonClientModifiedKey]].timeIntervalSince1970;
+    
+    if([keys containsObject:kJsonIsDownloading])
+        self.isDownloading = [jsonDict[kJsonIsDownloading] boolValue];
     
     if([keys containsObject:kJsonContentsKey]){
         NSArray *contents = jsonDict[kJsonContentsKey];

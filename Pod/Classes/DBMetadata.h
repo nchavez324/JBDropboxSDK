@@ -50,6 +50,8 @@
  */
 @property (nonatomic, retain) NSString * mimeType;
 @property (nonatomic) NSTimeInterval clientModified;
+@property (nonatomic, retain) NSString * localPath;
+@property (nonatomic) BOOL isDownloading;
 
 @end
 

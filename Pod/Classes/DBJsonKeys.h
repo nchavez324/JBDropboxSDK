@@ -24,6 +24,8 @@ static NSString * const kJsonFilenameKey       = @"filename";
 static NSString * const kJsonModifiedKey       = @"modified";
 static NSString * const kJsonMimeTypeKey       = @"mime_type";
 static NSString * const kJsonClientModifiedKey = @"client_mtime";
+static NSString * const kJsonLocalPathKey      = @"localPath";
+static NSString * const kJsonIsDownloading     = @"isDownloading";
 
 //MediaStream
 static NSString * const kJsonUrlKey            = @"url";

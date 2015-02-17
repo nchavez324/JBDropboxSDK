@@ -23,4 +23,8 @@
 
 - (void)restClient:(DBRestClient *)client loadMediaStreamUrlFailedWithError:(NSError *)error path:(NSString *)path;
 
+- (void)restClient:(DBRestClient *)client downloadedFile:(NSData *)data withMetadata:(DBMetadata *)metadata path:(NSString *)path;
+
+- (void)restClient:(DBRestClient *)client downloadFileFailedWithError:(NSError *)error path:(NSString *)path;
+
 @end

@@ -9,7 +9,7 @@
 
 Pod::Spec.new do |s|
   s.name             = "JBDropboxSDK"
-  s.version          = "0.1.0"
+  s.version          = "0.2.0"
   s.summary          = "JBDropboxSDK provides a limited SDK to the Dropbox Core API"
   s.description      = <<-DESC
   		       

@@ -16,6 +16,7 @@
 #import "AFHTTPRequestOperationManager.h"
 
 static NSString * const kBaseRestUrl = @"https://api.dropbox.com/1/";
+static NSString * const kBaseContentUrl = @"https://api-content.dropbox.com/1/";
 static NSString * const kDropboxRoot = @"dropbox";
 
 @interface DBRestClient ()
@@ -62,7 +63,7 @@ static NSString * const kDropboxRoot = @"dropbox";
                                      };
         
         //Build request URL
-        NSString *urlString = [DBRestClient urlForEndpoint:[NSString stringWithFormat:@"metadata/auto/%@", path]];
+        NSString *urlString = [DBRestClient urlForEndpoint:[NSString stringWithFormat:@"metadata/auto/%@", path] content:NO];
         urlString = [urlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
         
         //AFNetworking to make HTTP request
@@ -101,12 +102,28 @@ static NSString * const kDropboxRoot = @"dropbox";
  * to a delegate a streamable url and an expiration date.
  */
 - (void)loadMediaStreamUrl:(NSString *)path {
+    
+    //check if song has been saved for offline use
+    NSArray *results = [DBMetadata fetchMetadataWithPath:path withPredicate:nil inContext:[DBCoreDataManager mainContext]];
+    if(results > 0 && [results[0] isKindOfClass:[DBMetadata class]]) {
+        
+        DBMetadata *metadata = results[0];
+        //check if saved for offline use
+        if(metadata.localPath != nil && metadata.localPath.length != 0) {
+            
+            //offline use!
+            NSURL *localURL = [NSURL URLWithString:metadata.localPath relativeToURL:nil];
+            //for now ---..
+            [self.delegate restClient:self loadedMediaStreamUrl:localURL expiration:nil path:path];
+        }
+    }
+    
     //locale
     NSDictionary *parameters = @{
         @"access_token": self.session.accessToken
     };
     //Build URL
-    NSString *urlString = [DBRestClient urlForEndpoint:[NSString stringWithFormat:@"media/auto/%@", path]];
+    NSString *urlString = [DBRestClient urlForEndpoint:[NSString stringWithFormat:@"media/auto/%@", path] content:NO];
     urlString = [urlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     
     //AFNetworking make HTTP request
@@ -145,9 +162,56 @@ static NSString * const kDropboxRoot = @"dropbox";
     
 }
 
+- (void)downloadFile:(NSString *)path {
+
+    //check if already downloading
+    NSArray *results = [DBMetadata fetchMetadataWithPath:path withPredicate:nil inContext:[DBCoreDataManager mainContext]];
+    if(results > 0 && [results[0] isKindOfClass:[DBMetadata class]]) {
+        
+        DBMetadata *metadata = results[0];
+        //check if saved for offline use
+        if(metadata.isDownloading)
+            return;
+    }
+
+    NSDictionary *parameters =
+        @{
+          @"access_token": self.session.accessToken
+        };
+        
+    //Build request URL
+    NSString *urlString = [DBRestClient urlForEndpoint:[NSString stringWithFormat:@"files/auto/%@", path] content:YES];
+    urlString = [urlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+        
+    //AFNetworking to make HTTP request
+    [self.reqOpManager GET:urlString parameters:parameters success:^(AFHTTPRequestOperation *operation, id responseObject) {
+            
+        //Inform delegate, save in cache
+        if(self.delegate){
+            if(responseObject == nil){
+                if([self.delegate respondsToSelector:@selector(restClient:downloadFileFailedWithError:path:)]){
+                    NSError *error = [NSError errorWithDomain:[self.class description] code:3 userInfo:nil];
+                    [self.delegate restClient:self downloadFileFailedWithError:error path:path];
+                }
+            }else{
+                if([self.delegate respondsToSelector:@selector(restClient:downloadedFile:withMetadata:path:)]){
+                    NSData *data = responseObject;
+                    //TODO: async
+                    [self.delegate restClient:self downloadedFile:data withMetadata:nil path:path];
+                }
+            }
+        }
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        if(self.delegate && [self.delegate respondsToSelector:@selector(restClient:downloadFileFailedWithError:path:)]){
+            NSError *error = [NSError errorWithDomain:[self.class description] code:4 userInfo:nil];
+            [self.delegate restClient:self downloadFileFailedWithError:error path:path];
+        }
+    }];
+}
+
 //Builds URL to ask for media stream URL
-+ (NSString *)urlForEndpoint:(NSString *)endpoint {
-    return [NSString stringWithFormat:@"%@%@", kBaseRestUrl, endpoint];
++ (NSString *)urlForEndpoint:(NSString *)endpoint content:(BOOL)isContent {
+    return [NSString stringWithFormat:@"%@%@", isContent?kBaseContentUrl:kBaseRestUrl, endpoint];
 }
 
 @end
