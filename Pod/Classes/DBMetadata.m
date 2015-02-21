@@ -137,7 +137,7 @@ static NSDateFormatter *_dateFormatter;
     if(path){
         //Update existing metadata, if exists
         NSPredicate *pred = [NSPredicate predicateWithFormat:@"path == %@", path];
-        NSArray *metadatum = [DBMetadata fetchMetadataWithPath:path withPredicate:pred inContext:context];
+        NSArray *metadatum = [DBMetadata fetchMetadataWithPredicate:pred inContext:context];
         if(metadatum && metadatum.count > 0)
             metadata = metadatum[0];
         
@@ -163,7 +163,7 @@ static NSDateFormatter *_dateFormatter;
     return [DBMetadata insertMetadataWithJSON:JSON asSubMetadata:NO inContext:context];
 }
 
-+ (NSArray *)fetchMetadataWithPath:(NSString *)path withPredicate:(NSPredicate *)predicate inContext:(NSManagedObjectContext *)context {
++ (NSArray *)fetchMetadataWithPredicate:(NSPredicate *)predicate inContext:(NSManagedObjectContext *)context {
     NSFetchRequest *fetchReq = [[NSFetchRequest alloc] init];
     
     NSEntityDescription *entityDesc = [NSEntityDescription entityForName:NSStringFromClass([DBMetadata class]) inManagedObjectContext:context];
@@ -185,7 +185,7 @@ static NSDateFormatter *_dateFormatter;
 //Ensures metadata is complete with contents
 + (DBMetadata *)fetchMetadataCompleteWithPath:(NSString *)path inContext:(NSManagedObjectContext *)context {
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"path == %@ && completed == YES", path];
-    NSArray *metadatum = [DBMetadata fetchMetadataWithPath:path withPredicate:predicate inContext:context];
+    NSArray *metadatum = [DBMetadata fetchMetadataWithPredicate:predicate inContext:context];
     if(metadatum && metadatum.count > 0)
         return metadatum[0];
     else

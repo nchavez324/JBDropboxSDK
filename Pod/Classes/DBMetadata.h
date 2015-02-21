@@ -24,7 +24,7 @@
 
 + (DBMetadata *)insertMetadataWithJSON:(id)JSON inContext:(NSManagedObjectContext *)context;
 + (DBMetadata *)fetchMetadataCompleteWithPath:(NSString *)path inContext:(NSManagedObjectContext *)context;
-+ (NSArray *)fetchMetadataWithPath:(NSString *)path withPredicate:(NSPredicate *)predicate inContext:(NSManagedObjectContext *)context;
++ (NSArray *)fetchMetadataWithPredicate:(NSPredicate *)predicate inContext:(NSManagedObjectContext *)context;
 
 @property (nonatomic) int32_t bytes;
 @property (nonatomic, retain) NSString * filename;

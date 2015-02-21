@@ -30,7 +30,7 @@
 //Request a media stream URL for given path
 - (void)loadMediaStreamUrl:(NSString *)path;
 
-//Save a file by path
+//Save a file by path to a disk, informs of local path thru delegate
 - (void)downloadFile:(NSString *)path;
 
 @end
